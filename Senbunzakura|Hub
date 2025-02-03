@@ -1,48 +1,31 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- Load MacLib UI Library
+local MacLib = require(game:GetService("ReplicatedStorage"):WaitForChild("MacLib"))
 
-local Window = Rayfield:CreateWindow({
-    Name = "Senbunzakura|Hub",
-    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-    LoadingTitle = "Made By Syko",
-    LoadingSubtitle = "by Syko",
-    Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
- 
-    DisableRayfieldPrompts = false,
-    DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
- 
-    ConfigurationSaving = {
-       Enabled = true,
-       FolderName = nil, -- Create a custom folder for your hub/game
-       FileName = "Big Hub"
-    },
- 
-    Discord = {
-       Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-       Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
-    },
- 
-    KeySystem = false, -- Set this to true to use our key system
-    KeySettings = {
-       Title = "Untitled",
-       Subtitle = "Key System",
-       Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-       FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-       SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-       GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-       Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
-    }
- })
+-- Create Main UI
+local ui = MacLib:CreateUI({
+    Name = "Senbunzakura | Hub",
+    Size = UDim2.new(0, 400, 0, 300),
+    Position = UDim2.new(0.5, -200, 0.5, -150),
+    Parent = game.Players.LocalPlayer.PlayerGui -- Display UI in the player's GUI
+})
 
- local MainTab = Window:CreateTab("Main", Nil) -- Title, Image
- local Section = MainTab:CreateSection("Main")
+-- Create Main Tab
+local mainTab = ui:CreateTab({
+    Name = "Main",
+    Icon = nil -- Optionally add an icon here
+})
 
- local Divider = MainTab:CreateDivider()
+-- Create Section within Main Tab
+local section = mainTab:CreateSection("Main")
 
- local Toggle = MainTab:CreateToggle({
+-- Divider for UI organization
+local divider = mainTab:CreateDivider()
+
+-- Create Toggle for Nape Resizer
+local napeToggle = mainTab:CreateToggle({
     Name = "Nape Extender",
     CurrentValue = false,
-    Flag = "EnableTitanResizer", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Flag = "EnableTitanResizer",
     Callback = function(Value)
         if Value then
             local titansFolder = game.Workspace:WaitForChild("Titans")
@@ -51,16 +34,13 @@ local Window = Rayfield:CreateWindow({
             for _, titan in ipairs(titansFolder:GetChildren()) do
                 print("Processing Titan:", titan.Name)
 
-                -- Find the Hitboxes folder inside the Titan
+                -- Resize the Nape part inside each Titan's Hitbox
                 local hitboxes = titan:FindFirstChild("Hitboxes")
                 if hitboxes then
-                    -- Find the Hit folder inside Hitboxes
                     local hitFolder = hitboxes:FindFirstChild("Hit")
                     if hitFolder then
-                        -- Find the Nape part inside Hit
                         local napePart = hitFolder:FindFirstChild("Nape")
                         if napePart and napePart:IsA("BasePart") then
-                            -- Set the Nape part's size to 100, 100, 100
                             napePart.Size = Vector3.new(100, 100, 100)
                             print("Resized Nape for Titan:", titan.Name)
                         else
@@ -73,86 +53,130 @@ local Window = Rayfield:CreateWindow({
                     warn("No 'Hitboxes' folder found in Titan:", titan.Name)
                 end
             end
-
             print("Script completed.")
         else
             print("Titan Resizer is disabled.")
         end
-    end,
+    end
 })
 
--- Create a Toggle
-local Toggle = MainTab:CreateToggle({
-    Name = "Nape Visibility",  -- Name displayed in the UI
-    CurrentValue = false,     -- Initial state of the toggle (false = off, true = on)
-    Flag = "EnableNapeVisibility", -- Unique identifier for the toggle
+-- Create Toggle for Nape Visibility
+local visibilityToggle = mainTab:CreateToggle({
+    Name = "Nape Visibility",
+    CurrentValue = false,
+    Flag = "EnableNapeVisibility",
     Callback = function(Value)
-        if Value then
-            local titansFolder = game.Workspace:WaitForChild("Titans")
+        local titansFolder = game.Workspace:WaitForChild("Titans")
 
-            -- Loop through each Titan in the Titans folder
-            for _, titan in ipairs(titansFolder:GetChildren()) do
-                print("Processing Titan:", titan.Name)
+        -- Loop through each Titan in the Titans folder
+        for _, titan in ipairs(titansFolder:GetChildren()) do
+            print("Processing Titan:", titan.Name)
 
-                -- Find the Hitboxes folder inside the Titan
-                local hitboxes = titan:FindFirstChild("Hitboxes")
-                if hitboxes then
-                    -- Find the Hit folder inside Hitboxes
-                    local hitFolder = hitboxes:FindFirstChild("Hit")
-                    if hitFolder then
-                        -- Find the Nape part inside Hit
-                        local napePart = hitFolder:FindFirstChild("Nape")
-                        if napePart and napePart:IsA("BasePart") then
-                            -- Set the Nape part's transparency to 0 (fully visible)
+            local hitboxes = titan:FindFirstChild("Hitboxes")
+            if hitboxes then
+                local hitFolder = hitboxes:FindFirstChild("Hit")
+                if hitFolder then
+                    local napePart = hitFolder:FindFirstChild("Nape")
+                    if napePart and napePart:IsA("BasePart") then
+                        if Value then
+                            -- Set Nape visibility
                             napePart.Transparency = 0.01
-                            -- Set the Nape part's material to SmoothPlastic
                             napePart.Material = Enum.Material.SmoothPlastic
                             print("Made Nape visible for Titan:", titan.Name)
                         else
-                            warn("No valid 'Nape' part found in Titan:", titan.Name)
-                        end
-                    else
-                        warn("No 'Hit' folder found in Hitboxes for Titan:", titan.Name)
-                    end
-                else
-                    warn("No 'Hitboxes' folder found in Titan:", titan.Name)
-                end
-            end
-
-            print("Nape Visibility enabled.")
-        else
-            local titansFolder = game.Workspace:WaitForChild("Titans")
-
-            -- Loop through each Titan in the Titans folder
-            for _, titan in ipairs(titansFolder:GetChildren()) do
-                print("Processing Titan:", titan.Name)
-
-                -- Find the Hitboxes folder inside the Titan
-                local hitboxes = titan:FindFirstChild("Hitboxes")
-                if hitboxes then
-                    -- Find the Hit folder inside Hitboxes
-                    local hitFolder = hitboxes:FindFirstChild("Hit")
-                    if hitFolder then
-                        -- Find the Nape part inside Hit
-                        local napePart = hitFolder:FindFirstChild("Nape")
-                        if napePart and napePart:IsA("BasePart") then
-                            -- Restore the Nape part's transparency to 1 (fully transparent)
+                            -- Restore Nape visibility
                             napePart.Transparency = 1
-                            -- Restore the Nape part's material to SmoothPlastic
                             napePart.Material = Enum.Material.SmoothPlastic
                             print("Restored Nape visibility for Titan:", titan.Name)
-                        else
-                            warn("No valid 'Nape' part found in Titan:", titan.Name)
                         end
                     else
-                        warn("No 'Hit' folder found in Hitboxes for Titan:", titan.Name)
+                        warn("No valid 'Nape' part found in Titan:", titan.Name)
                     end
                 else
-                    warn("No 'Hitboxes' folder found in Titan:", titan.Name)
+                    warn("No 'Hit' folder found in Hitboxes for Titan:", titan.Name)
+                end
+            else
+                warn("No 'Hitboxes' folder found in Titan:", titan.Name)
+            end
+        end
+    end
+})
+
+-- Create Toggle for Auto Farm Mission (Blade)
+local autoFarmToggle = mainTab:CreateToggle({
+    Name = "Auto Farm Mission (Blade)",
+    CurrentValue = false,
+    Flag = "AutoFarmFeature",
+    Callback = function(Value)
+        if Value then
+            print("Auto Farm Enabled")
+            
+            -- Wait for 3 seconds before auto farming
+            wait(3)
+
+            -- Services --
+            local VIM = game:GetService("VirtualInputManager")
+            local UIS = game:GetService("UserInputService")
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+
+            -- Settings --
+            local delay = 1  -- Delay between each click in seconds
+            local rightClick = false  -- Set to true if you want to right-click, false for left-click
+            local autoPressE = true  -- Set to true to automatically press 'E'
+            local autoPressQ = true  -- Set to true to automatically press 'Q'
+
+            -- Auto Click Function
+            local function AutoClick()
+                while Value do
+                    -- Get the current mouse position
+                    local mousePosition = UIS:GetMouseLocation()
+
+                    -- Trigger the click event (left or right based on the setting)
+                    VIM:SendMouseButtonEvent(mousePosition.X, mousePosition.Y, rightClick and 1 or 0, true, nil, 0)
+                    VIM:SendMouseButtonEvent(mousePosition.X, mousePosition.Y, rightClick and 1 or 0, false, nil, 0)
+
+                    -- Wait for the delay
+                    wait(delay)
                 end
             end
 
-            print("Nape Visibility disabled.")
+            -- Function to simulate key press
+            local function simulateKeyPress(keyCode)
+                VIM:SendKeyEvent(true, keyCode, false, game)
+                wait(1.5)
+                VIM:SendKeyEvent(false, keyCode, false, game)
+            end
+
+            -- Function to resize the nape hitbox
+            local function resizeNapeHitbox(nape, size)
+                if nape and nape:IsA("BasePart") then
+                    nape.Size = size
+                    print("Nape hitbox resized to " .. tostring(size))
+                else
+                    warn("Invalid nape part or part is missing!")
+                end
+            end
+
+            -- Start the auto-clicking and key-pressing in separate threads
+            local clickThread = coroutine.create(AutoClick)
+            local keyPressThread = coroutine.create(function()
+                while Value do
+                    if autoPressE then
+                        simulateKeyPress(Enum.KeyCode.E)
+                    end
+                    if autoPressQ then
+                        simulateKeyPress(Enum.weyCode.Q)
+                    end
+                    wait(1.5)
+                end
+            end)
+
+            coroutine.resume(clickThread)
+            coroutine.resume(keyPressThread)
+
+        else
+            print("Auto Farm Disabled")
         end
-    end,
+    end
 })
